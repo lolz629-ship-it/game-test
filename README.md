@@ -1,37 +1,35 @@
-# Verdant Engine
+# Verdant Engine 3.0 — The Little Wild
 
-A local, offline roguelite incremental game about a magical forest reclaiming an abandoned industrial world.
+Extract the full desktop download and open **Verdant Engine.exe**. Keep all bundled files together. No browser or installation required.
 
-## Play
+## New in version 3
+Six cartoon companions: Pip the seedling scout, Luma the moth, Bram the beetle, Zig the storm sprite, Nori the rain frog, and Roo the rocket mouse.
 
-On Windows, extract the download and double-click **Play.cmd** inside the VerdantEngine folder. The portable Windows release includes Node.js; the source-only edition requires Node.js 18 or newer. On other systems, run `node server.mjs` in the game folder and open http://127.0.0.1:47831.
+Sixteen workshop blueprints develop to level 6, with behavior-changing evolutions at levels 3 and 6: landing explosions, crew rallies, excavation shockwaves, flower patches, and lightning webs. Base production also increases during development.
 
-Play in one browser tab at a time. The local server listens only on your computer. No internet is needed except to check or download updates. Keep using the same address and browser for browser backups.
+Prestige is now a collection of sixteen expedition-changing keepsakes. Full restorations offer a free choice. Equip three between runs: try portals, mushroom trampolines, a hatchable egg, picnics, a pocket orchestra, or friendly meteors. Early returns earn seeds to discover more keepsakes.
 
-## Your journey
+240 Hz simulation, hardware acceleration, selectable 30/60/120/144/240 FPS target, and a live frame counter. Actual frames depend on your monitor and hardware. Gameplay speed is independent of rendering speed.
 
-- Three independent save slots and three freely changeable playstyles.
-- Five districts per expedition, four randomized relic drafts, and a final restoration reward.
-- Four repeatable expedition upgrades; rhythmic clicks build up to a 35% bonus.
-- 48 permanent skill nodes with three ranks each, prerequisites, and free refunds between runs.
-- Increasing prestige difficulty and seed rewards, an expedition journal, and up to eight hours of offline passive production.
-- Manual saves, configurable autosaving, backup import/export, sound, motion, text size, and contrast settings.
+Ability explanations, character hover tips, evolution descriptions, original generative ethereal music, and shorter runs. Automated starter scenarios finish in about 101–159 seconds with frequent purchases; human pacing varies.
 
-Harvest using the central button or Space. Spend aether frequently. Your restoration total never decreases when you spend. Restore each district to select a relic. Return after the first milestone to bank seeds, or complete all five for a larger reward. Invest seeds in the root network before beginning again.
+## Controls
+Hold and sweep salvage. Click characters to activate their special power and overcharge them. Space provides aim assist. Q strikes every target with a root pulse; E turns salvage into flowers and harvests them. Click eggs, mushrooms and lanterns when their keepsakes are packed.
+
+Restore five districts, draft relics, and break the final heart seal. Complete the run to bring home a free discovery. Music and effects have independent volume controls in Settings.
 
 ## Saves and updates
+Three groves, autosave, manual save, disk backups, JSON import/export, and optional offline growth. Saves live in the **VerdantEngine-saves** folder BESIDE the extracted game folder. Keep it when updating. Put the new game folder beside the same saves folder, or export and import a backup when moving elsewhere.
 
-The server saves all groves to **VerdantEngine-saves/groves.json beside the game folder**, plus a previous-copy backup. Browser storage provides a second copy. Save schema 1 is versioned independently from game releases. The game selects the newest valid browser or disk archive at startup.
+Version 3 reads groves-v2.json and original groves.json. Former root-network purchases are refunded in full as ancient seeds. Existing runs remain; workshop development is capped at six. Original files are retained. Version 3 writes groves-v3.json with a backup. Version 3 saves cannot be opened in older versions.
 
-Before updating, use Settings → Export all groves. Save, close the game tab, and run **Stop.cmd** to stop its local server, replace only the **VerdantEngine** folder, and leave **VerdantEngine-saves** in place. Reopen Play.cmd. If you move to a different parent folder or device, import your exported backup. Never include your save folder in a public repository.
-
-Settings checks the latest public GitHub release in **lolz629-ship-it/game-test** and offers its download when newer. Updates are downloaded with your approval and installed by replacing the game folder; the game never executes downloaded code automatically.
+Settings → Check for updates reads https://github.com/lolz629-ship-it/game-test/releases. Downloads are explicit and saves remain separate.
 
 ## Development
+JavaScript modules, Canvas 2D, Web Audio, Electron 44.3.0. Run `node --test tests.mjs`. No npm dependencies needed for gameplay tests.
 
-Dependency-free ES modules: `engine.mjs` contains all deterministic economy rules, `app.mjs` the interface, `style.css` presentation, and `server.mjs` local storage and static serving. Run `node --test tests.mjs server-tests.mjs` for regression tests and balance simulations. Run `node build.mjs` to validate syntax and assemble `dist/VerdantEngine`.
+For packaging, download the official Electron 44.3.0 Windows x64 runtime and verify its SHA256 against official SHASUMS256.txt. Set ELECTRON_RUNTIME to its extracted folder, VERDANT_BUILD_DIR to the desired output, then run `node build.mjs`.
 
-Release: update the version in engine.mjs and package.json, test, build, package VerdantEngine.zip, and publish a matching GitHub release tag. The updater uses the latest release API and the asset name VerdantEngine.zip. Keep save schema stable or implement a migration before changing it.
+The Windows workflow runs tests, builds, launches a desktop smoke test with separate saves, and packages the game. Renderer isolation and sandboxing remain enabled, with no Node integration and a narrow save bridge.
 
-Initial balance is simulation-tested; long-term balance still benefits from real play feedback. Original game art was generated for this project. No analytics or third-party fonts are loaded.
-
+Characters are original Canvas artwork; music is an original generative score. Sanctuary background generated for this project. Electron and Chromium licenses accompany the runtime. Inspiration: tactile interaction in Gamblers Table, progression rhythm in Nodebuster and Digseum, and build choices in roguelites. No assets or music from those games are used.
