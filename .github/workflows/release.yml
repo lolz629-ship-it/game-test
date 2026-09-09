@@ -1,1 +1,35 @@
-
+name: Build release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test tests.mjs server-tests.mjs
+      - run: node build.mjs
+      - name: Bundle portable Windows runtime
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist/VerdantEngine/runtime | Out-Null
+          Copy-Item (Get-Command node).Source dist/VerdantEngine/runtime/node.exe
+          $nodeVersion = node -p process.version
+          Invoke-WebRequest "https://raw.githubusercontent.com/nodejs/node/$nodeVersion/LICENSE" -OutFile dist/VerdantEngine/runtime/LICENSE
+          Compress-Archive -Path dist/VerdantEngine -DestinationPath dist/VerdantEngine.zip
+      - name: Publish GitHub download
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create $env:GITHUB_REF_NAME dist/VerdantEngine.zip --title "Verdant Engine $env:GITHUB_REF_NAME" --notes "Portable Windows game. Extract and open Play.cmd. Keep the separate VerdantEngine-saves folder when updating."
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VerdantEngine
+          path: dist/VerdantEngine.zip
