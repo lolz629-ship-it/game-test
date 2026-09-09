@@ -1,8 +1,11 @@
-name: Build release
+name: Build desktop release
 on:
-  push:
-    tags: ['v*']
   workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish version 3.0.0 after validation
+        type: boolean
+        default: false
 permissions:
   contents: write
 jobs:
@@ -13,23 +16,46 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - run: node --test tests.mjs server-tests.mjs
-      - run: node build.mjs
-      - name: Bundle portable Windows runtime
+      - run: node --test tests.mjs
+      - name: Download verified Electron runtime
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force dist/VerdantEngine/runtime | Out-Null
-          Copy-Item (Get-Command node).Source dist/VerdantEngine/runtime/node.exe
-          $nodeVersion = node -p process.version
-          Invoke-WebRequest "https://raw.githubusercontent.com/nodejs/node/$nodeVersion/LICENSE" -OutFile dist/VerdantEngine/runtime/LICENSE
-          Compress-Archive -Path dist/VerdantEngine -DestinationPath dist/VerdantEngine.zip
-      - name: Publish GitHub download
-        if: startsWith(github.ref, 'refs/tags/')
+          $filename = 'electron-v44.3.0-win32-x64.zip'
+          $base = 'https://github.com/electron/electron/releases/download/v44.3.0/'
+          Invoke-WebRequest "$base$filename" -OutFile electron.zip
+          $checksums = (Invoke-WebRequest "${base}SHASUMS256.txt").Content
+          $hash = (Get-FileHash electron.zip -Algorithm SHA256).Hash.ToLower()
+          if (-not ($checksums -match "$hash\s+\*?$filename")) { throw 'Runtime checksum mismatch' }
+          Expand-Archive electron.zip -DestinationPath electron-runtime
+      - name: Build standalone game
+        shell: pwsh
+        run: |
+          $env:ELECTRON_RUNTIME = Join-Path $pwd 'electron-runtime'
+          $env:VERDANT_BUILD_DIR = Join-Path $pwd 'dist/VerdantEngine-v3-Desktop'
+          node build.mjs
+      - name: Desktop smoke test
+        shell: pwsh
+        run: |
+          $env:VERDANT_SMOKE = Join-Path $pwd 'smoke.json'
+          $env:VERDANT_DATA_DIR = Join-Path $pwd 'test-saves'
+          $process = Start-Process 'dist/VerdantEngine-v3-Desktop/Verdant Engine.exe' -WindowStyle Hidden -PassThru
+          if (-not $process.WaitForExit(45000)) { $process.Kill(); throw 'Desktop smoke test timed out' }
+          $result = Get-Content smoke.json | ConvertFrom-Json
+          if ($result.error -or -not $result.board -or -not $result.saved -or $result.upgrades -ne 16 -or $result.errors.Count -gt 0 -or $result.fpsOptions -notcontains '240') { throw (Get-Content smoke.json) }
+      - name: Package desktop download
+        shell: pwsh
+        run: Compress-Archive -Path dist/VerdantEngine-v3-Desktop -DestinationPath dist/VerdantEngine.zip
+      - name: Publish version 3
+        if: inputs.publish
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create $env:GITHUB_REF_NAME dist/VerdantEngine.zip --title "Verdant Engine $env:GITHUB_REF_NAME" --notes "Portable Windows game. Extract and open Play.cmd. Keep the separate VerdantEngine-saves folder when updating."
+        run: gh release create v3.0.0 dist/VerdantEngine.zip --target $env:GITHUB_SHA --title "Verdant Engine 3.0 - The Little Wild" --notes-file RELEASE.md
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: VerdantEngine
-          path: dist/VerdantEngine.zip
+          name: desktop-validation
+          path: |
+            dist/VerdantEngine.zip
+            smoke.json
+            smoke.json.png
