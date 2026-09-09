@@ -76,4 +76,4 @@ export const evolutions={
  fortune:['Lucky lunchbox','Every fifth chest opens a flower surprise.','Golden harvests scatter into nearby nodes.'],
  pick:['Burrow boots','Cracking a cache sends an excavation shockwave.','Your first cache hit splits its shell instantly.'],
  harmony:['Crew handshake','Waking one friend also wakes its nearest buddy.','Overcharged friends share a landing burst.']};
-export function upgradeInfo(s,id){const level=s.run.upgrades[id],v=evolutions[id];return {name:v[0],next:level<1?gear.find(g=>g.id===id).desc:level<3?v[1]:level<6?v[2]:'Both evolutions unlocked.',milestone:level<3?3:6};}
+export function upgradeInfo(s,id){const level=s.run.upgrades[id],v=evolutions[id];return {name:v[0],next:level<1?gear.find(g=>g.id===id).desc:level<3?v[1]:level<6?v[2]:v[1]+' '+v[2],milestone:level<3?3:6};}

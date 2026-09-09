@@ -3,4 +3,4 @@ runtime/
 *.zip
 *.log
 VerdantEngine-saves/
-groves.json*
+groves*.json*
