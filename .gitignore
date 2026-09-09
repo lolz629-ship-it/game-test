@@ -1,0 +1,6 @@
+dist/
+runtime/
+*.zip
+*.log
+VerdantEngine-saves/
+groves.json*
